@@ -38,6 +38,9 @@ class Cita
     #[ORM\Column(length: 50)]
     private ?string $estado = null;
 
+    #[ORM\Column]
+    private ?int $prioridad = null;
+
     public function getId(): ?int
     {
         return $this->id;

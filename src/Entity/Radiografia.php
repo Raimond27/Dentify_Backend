@@ -30,6 +30,9 @@ class Radiografia
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $observaciones = null;
 
+    #[ORM\Column]
+    private bool $activa = true;
+
     public function getId(): ?int
     {
         return $this->id;

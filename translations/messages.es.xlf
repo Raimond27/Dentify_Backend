@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="es" datatype="plaintext" original="file.ext">
+    <header>
+      <tool tool-id="symfony" tool-name="Symfony"/>
+    </header>
+    <body>
+      <trans-unit id="app.welcome" resname="app.welcome">
+        <source>Welcome to Dentify</source>
+        <target>Bienvenido a Dentify</target>
+      </trans-unit>
+      <trans-unit id="app.login_failure" resname="app.login_failure">
+        <source>Invalid credentials</source>
+        <target>Credenciales inválidas</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

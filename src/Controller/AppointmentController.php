@@ -2,71 +2,40 @@
 
 namespace App\Controller;
 
-use App\Dto\AppointmentDto;
+use App\Entity\Cita;
 use App\Service\AppointmentService;
+use App\Service\PatientService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/appointments')]
 class AppointmentController extends AbstractController
 {
     public function __construct(
-        private AppointmentService $service,
-        private SerializerInterface $serializer,
-        private ValidatorInterface $validator
+        private AppointmentService $appointmentService,
+        private EntityManagerInterface $entityManager
     ) {}
-
-    #[Route('', methods: ['GET'])]
-    public function list(): JsonResponse
-    {
-        $appointments = $this->service->getAll();
-        return $this->json($appointments);
-    }
-
-    #[Route('/{id}', methods: ['GET'])]
-    public function get(int $id): JsonResponse
-    {
-        $appointment = $this->service->getById($id);
-        return $this->json($appointment);
-    }
 
     #[Route('', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
-        $dto = $this->serializer->deserialize($request->getContent(), AppointmentDto::class, 'json');
+        $data = json_decode($request->getContent(), true);
         
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json($errors, Response::HTTP_BAD_REQUEST);
+        $cita = new Cita();
+        // Mapping logic here (simplified for skeleton)
+        // ...
+        
+        if (!$this->appointmentService->isAvailable($cita)) {
+            return $this->json(['error' => 'Specialist or Box not available'], Response::HTTP_CONFLICT);
         }
 
-        $appointment = $this->service->create($dto);
-        return $this->json($appointment, Response::HTTP_CREATED);
-    }
+        $this->entityManager->persist($cita);
+        $this->entityManager->flush();
 
-    #[Route('/{id}', methods: ['PUT'])]
-    public function update(int $id, Request $request): JsonResponse
-    {
-        $dto = $this->serializer->deserialize($request->getContent(), AppointmentDto::class, 'json');
-        
-        $errors = $this->validator->validate($dto);
-        if (count($errors) > 0) {
-            return $this->json($errors, Response::HTTP_BAD_REQUEST);
-        }
-
-        $appointment = $this->service->update($id, $dto);
-        return $this->json($appointment);
-    }
-
-    #[Route('/{id}', methods: ['DELETE'])]
-    public function delete(int $id): JsonResponse
-    {
-        $this->service->delete(\App\Entity\Cita::class, $id);
-        return $this->json(null, Response::HTTP_NO_CONTENT);
+        return $this->json($cita, Response::HTTP_CREATED);
     }
 }

@@ -15,19 +15,16 @@ class ProtocoloTratamiento
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $nombre = null;
+    private ?string $nombreTratamiento = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $descripcion = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $materialNecesario = null;
+    private ?string $notasPasoAPaso = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
-    private ?string $cantidad = null;
+    private ?string $cantidadNecesaria = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $estado = null;
+    #[ORM\ManyToOne(targetEntity: StockMaterial::class)]
+    private ?StockMaterial $material = null;
 
     public function getId(): ?int
     {

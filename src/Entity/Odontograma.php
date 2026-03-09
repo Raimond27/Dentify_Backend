@@ -29,10 +29,20 @@ class Odontograma
     #[ORM\OneToMany(targetEntity: PrimeraVisita::class, mappedBy: 'odontogramaInicial')]
     private Collection $primeraVisitas;
 
+    #[ORM\OneToMany(targetEntity: Patologia::class, mappedBy: 'odontograma', cascade: ['persist', 'remove'])]
+    private Collection $patologias;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $fechaCreacion = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $fechaModificacion = null;
+
     public function __construct()
     {
         $this->tratamientos = new ArrayCollection();
         $this->primeraVisitas = new ArrayCollection();
+        $this->patologias = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -86,6 +96,36 @@ class Odontograma
             // set the owning side to null (unless already changed)
             if ($tratamiento->getOdontograma() === $this) {
                 $tratamiento->setOdontograma(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Patologia>
+     */
+    public function getPatologias(): Collection
+    {
+        return $this->patologias;
+    }
+
+    public function addPatologia(Patologia $patologia): static
+    {
+        if (!$this->patologias->contains($patologia)) {
+            $this->patologias->add($patologia);
+            $patologia->setOdontograma($this);
+        }
+
+        return $this;
+    }
+
+    public function removePatologia(Patologia $patologia): static
+    {
+        if ($this->patologias->removeElement($patologia)) {
+            // set the owning side to null (unless already changed)
+            if ($patologia->getOdontograma() === $this) {
+                $patologia->setOdontograma(null);
             }
         }
 

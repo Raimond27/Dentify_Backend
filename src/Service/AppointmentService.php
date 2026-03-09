@@ -2,67 +2,37 @@
 
 namespace App\Service;
 
-use App\Dto\AppointmentDto;
-use App\Entity\Box;
 use App\Entity\Cita;
-use App\Entity\Odontologo;
-use App\Entity\Paciente;
 use App\Repository\CitaRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\HorarioRepository;
 
-class AppointmentService extends BaseService
+class AppointmentService
 {
     public function __construct(
-        EntityManagerInterface $entityManager,
-        private CitaRepository $repository
-    ) {
-        parent::__construct($entityManager);
+        private CitaRepository $citaRepository,
+        private HorarioRepository $horarioRepository
+    ) {}
+
+    public function isAvailable(Cita $cita): bool
+    {
+        // Check specialist schedule
+        $horario = $this->horarioRepository->findOneBy([
+            'odontologo' => $cita->getOdontologo(),
+            'fecha' => $cita->getFecha(),
+            'diaSemana' => $this->getDiaSemana($cita->getFecha())
+        ]);
+
+        if (!$horario) {
+            return false;
+        }
+
+        // Logic to check overlap in same box or same specialist
+        return !$this->citaRepository->findOverlapping($cita);
     }
 
-    public function getAll(): array
+    private function getDiaSemana(\DateTimeImmutable $date): string
     {
-        return $this->repository->findAll();
-    }
-
-    public function getById(int $id): Cita
-    {
-        return $this->findOrThrow(Cita::class, $id);
-    }
-
-    public function create(AppointmentDto $dto): Cita
-    {
-        $appointment = new Cita();
-        $this->mapDtoToEntity($dto, $appointment);
-        
-        $this->entityManager->persist($appointment);
-        $this->entityManager->flush();
-        
-        return $appointment;
-    }
-
-    public function update(int $id, AppointmentDto $dto): Cita
-    {
-        $appointment = $this->getById($id);
-        $this->mapDtoToEntity($dto, $appointment);
-        
-        $this->entityManager->flush();
-        
-        return $appointment;
-    }
-
-    private function mapDtoToEntity(AppointmentDto $dto, Cita $entity): void
-    {
-        $paciente = $this->findOrThrow(Paciente::class, $dto->pacienteId);
-        $odontologo = $this->findOrThrow(Odontologo::class, $dto->odontologoId);
-        $box = $this->findOrThrow(Box::class, $dto->boxId);
-
-        $entity->setPaciente($paciente);
-        $entity->setOdontologo($odontologo);
-        $entity->setBox($box);
-        
-        $entity->setFecha(new \DateTimeImmutable($dto->fecha));
-        $entity->setHoraInicio(new \DateTimeImmutable($dto->horaInicio));
-        $entity->setDuracion($dto->duracion);
-        $entity->setEstado($dto->estado);
+        $days = ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
+        return $days[(int)$date->format('w')];
     }
 }

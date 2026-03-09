@@ -35,17 +35,11 @@ class Paciente
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $email = null;
 
-    #[ORM\Column(type: Types::JSON, nullable: true)]
-    private array $alergias = [];
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $enfermedades = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $historialClinico = null;
-
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $datosFacturacion = null;
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private array $alergias = [];
 
     #[ORM\Column]
     private ?\DateTimeImmutable $fechaCreacion = null;
